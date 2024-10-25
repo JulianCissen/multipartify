@@ -1,6 +1,6 @@
 {
     "name": "multipartify",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "An express-based middleware library for parsing multipart requests.",
     "keywords": [
         "express",
