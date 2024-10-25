@@ -1,5 +1,5 @@
 {
-    "name": "multi-parser",
+    "name": "multiparse",
     "version": "0.1.0",
     "description": "An express-based middleware library for parsing multipart requests.",
     "keywords": [
@@ -13,15 +13,15 @@
         "upload",
         "multer"
     ],
-    "homepage": "https://github.com/JulianCissen/multi-parser",
-    "bugs": "https://github.com/JulianCissen/multi-parser/issues",
+    "homepage": "https://github.com/JulianCissen/multi-parter",
+    "bugs": "https://github.com/JulianCissen/multi-parter/issues",
     "license": "MIT",
     "author": "Julian Cissen",
     "files": [
         "dist/**/*"
     ],
     "main": "dist/index.js",
-    "repository": "github:JulianCissen/multi-parser",
+    "repository": "github:JulianCissen/multi-parter",
     "scripts": {
         "test": "jest",
         "build": "tsc -p tsconfig.build.json",
