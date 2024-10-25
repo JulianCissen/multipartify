@@ -8,7 +8,6 @@ import express, {
     type Response,
 } from 'express';
 import { getIdContext, setIdContext } from '../fixtures/AsyncLocalStorage';
-//import type { AddressInfo } from 'net';
 import { BufferStorageAdapter } from './Adapters';
 import type TestAgent from 'supertest/lib/agent';
 import { TestTransformer } from '../fixtures/TestTransformer';
