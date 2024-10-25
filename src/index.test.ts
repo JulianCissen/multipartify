@@ -1,4 +1,4 @@
-import { MultiParter, multiParterMiddleware } from '.';
+import { MultiPartify, multiPartifyMiddleware } from '.';
 import { RequestErroredError, RollbackError } from './errors';
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import express, {
@@ -19,7 +19,7 @@ import { randomUUID } from 'crypto';
 import { readFile } from 'fs/promises';
 import request from 'supertest';
 
-const defaultMultipartMiddleware = multiParterMiddleware({
+const defaultMultipartMiddleware = multiPartifyMiddleware({
     adapter: new BufferStorageAdapter(),
 });
 
@@ -31,7 +31,7 @@ let reqPromise: Promise<Request>;
 // stackoverflow.com/questions/71682239/supertest-failing-with-econnreset
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const getMultiParterServer = async <
+const getMultiPartifyServer = async <
     Route extends string,
     P = core.RouteParameters<Route>,
     ResBody = any,
@@ -92,7 +92,7 @@ const getMultiParterServer = async <
 
 describe('index', () => {
     beforeEach(async () => {
-        ({ server, requestAgent } = await getMultiParterServer([
+        ({ server, requestAgent } = await getMultiPartifyServer([
             defaultMultipartMiddleware,
         ]));
     });
@@ -157,8 +157,8 @@ describe('index', () => {
 
     it('should apply file transformer', async () => {
         // Custom server setup.
-        getMultiParterServer([
-            multiParterMiddleware({
+        getMultiPartifyServer([
+            multiPartifyMiddleware({
                 adapter: new BufferStorageAdapter(),
                 transformer: new TestTransformer(),
             }),
@@ -174,8 +174,8 @@ describe('index', () => {
     });
 
     it('should pass files through the fileFilter', async () => {
-        const { requestAgent } = await getMultiParterServer([
-            multiParterMiddleware({
+        const { requestAgent } = await getMultiPartifyServer([
+            multiPartifyMiddleware({
                 adapter: new BufferStorageAdapter(),
                 options: {
                     fileFilter: (file) => {
@@ -198,8 +198,8 @@ describe('index', () => {
     });
 
     it('should filter files with fileFilter', async () => {
-        const { requestAgent } = await getMultiParterServer([
-            multiParterMiddleware({
+        const { requestAgent } = await getMultiPartifyServer([
+            multiPartifyMiddleware({
                 adapter: new BufferStorageAdapter(),
                 options: {
                     fileFilter: (file) => {
@@ -219,7 +219,7 @@ describe('index', () => {
     });
 
     it('should handle content-type errors from busboy', async () => {
-        const { requestAgent } = await getMultiParterServer([
+        const { requestAgent } = await getMultiPartifyServer([
             (req, _, next) => {
                 delete req.headers['content-type'];
                 next();
@@ -238,7 +238,7 @@ describe('index', () => {
 
     it('should preserve asyncLocalStorage context', async () => {
         const testId = randomUUID();
-        const { requestAgent } = await getMultiParterServer([
+        const { requestAgent } = await getMultiPartifyServer([
             // Set ALS context.
             setIdContext(testId),
             defaultMultipartMiddleware,
@@ -259,8 +259,8 @@ describe('index', () => {
     });
 
     it('should respect maxFields', async () => {
-        const { requestAgent } = await getMultiParterServer([
-            multiParterMiddleware({
+        const { requestAgent } = await getMultiPartifyServer([
+            multiPartifyMiddleware({
                 adapter: new BufferStorageAdapter(),
                 options: {
                     maxFields: 1,
@@ -280,8 +280,8 @@ describe('index', () => {
     });
 
     it('should respect maxFiles', async () => {
-        const { requestAgent } = await getMultiParterServer([
-            multiParterMiddleware({
+        const { requestAgent } = await getMultiPartifyServer([
+            multiPartifyMiddleware({
                 adapter: new BufferStorageAdapter(),
                 options: {
                     maxFiles: 1,
@@ -302,8 +302,8 @@ describe('index', () => {
     });
 
     it('should respect maxParts', async () => {
-        const { requestAgent } = await getMultiParterServer([
-            multiParterMiddleware({
+        const { requestAgent } = await getMultiPartifyServer([
+            multiPartifyMiddleware({
                 adapter: new BufferStorageAdapter(),
                 options: {
                     maxParts: 1,
@@ -324,8 +324,8 @@ describe('index', () => {
     });
 
     it('should respect maxFieldNameSize', async () => {
-        const { requestAgent } = await getMultiParterServer([
-            multiParterMiddleware({
+        const { requestAgent } = await getMultiPartifyServer([
+            multiPartifyMiddleware({
                 adapter: new BufferStorageAdapter(),
                 options: {
                     maxFieldNameSize: 2, // 2 bytes
@@ -346,15 +346,15 @@ describe('index', () => {
         server.close();
         const app = express();
         app.post('/api', (req, res) => {
-            // @ts-expect-error MultiParter constructor is private.
-            const multiParter = new MultiParter({
+            // @ts-expect-error MultiPartify constructor is private.
+            const multiPartify = new MultiPartify({
                 req,
                 adapter: new BufferStorageAdapter(),
             });
             // Trigger request error.
             req.emit('aborted');
 
-            multiParter['parse']()
+            multiPartify['parse']()
                 .then(() => {
                     // Fail if parse somehow succeeds.
                     throw new Error('Parse should not succeed.');
@@ -385,8 +385,8 @@ describe('index', () => {
             throw new Error('Custom rollback error.');
         };
 
-        const { requestAgent } = await getMultiParterServer([
-            multiParterMiddleware({
+        const { requestAgent } = await getMultiPartifyServer([
+            multiPartifyMiddleware({
                 adapter,
                 options: {
                     maxParts: 1,
@@ -415,7 +415,7 @@ describe('index', () => {
     });
 
     it('should handle malformed requests', async () => {
-        ({ requestAgent } = await getMultiParterServer([
+        ({ requestAgent } = await getMultiPartifyServer([
             defaultMultipartMiddleware,
         ]));
 

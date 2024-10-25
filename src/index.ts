@@ -28,7 +28,7 @@ export interface File {
     filename: string;
 }
 type FileFilter = (file: File) => Promise<boolean> | boolean;
-export interface MultiParterOptions {
+export interface MultiPartifyOptions {
     maxFieldNameSize: number;
     maxFieldSize: number;
     maxFields: number;
@@ -39,7 +39,7 @@ export interface MultiParterOptions {
     fileFilter?: FileFilter;
 }
 
-const defaultMultiParterOptions: MultiParterOptions = {
+const defaultMultiPartifyOptions: MultiPartifyOptions = {
     maxFieldNameSize: 100, // 100 bytes
     maxFieldSize: 1024 * 1024, // 1MB
     maxFields: 1000,
@@ -50,11 +50,11 @@ const defaultMultiParterOptions: MultiParterOptions = {
 };
 
 // Extend event emitter to make the interal promise externally resolvable.
-export class MultiParter<T extends Partial<File>> extends EventEmitter {
+export class MultiPartify<T extends Partial<File>> extends EventEmitter {
     private fields: Field[] = [];
     private files: T[] = [];
 
-    private options: MultiParterOptions;
+    private options: MultiPartifyOptions;
     private busboyInstance!: busboy.Busboy;
 
     private _processingFiles = 0;
@@ -90,12 +90,12 @@ export class MultiParter<T extends Partial<File>> extends EventEmitter {
     }: {
         req: IncomingMessage;
         adapter: StorageAdapter<T>;
-        options?: Partial<MultiParterOptions>;
+        options?: Partial<MultiPartifyOptions>;
         transformer?: FileTransformer;
     }) {
         super();
         this.options = {
-            ...defaultMultiParterOptions,
+            ...defaultMultiPartifyOptions,
             ...options,
         };
         this.adapter = adapter;
@@ -154,14 +154,14 @@ export class MultiParter<T extends Partial<File>> extends EventEmitter {
     public static async create<T extends Partial<File>>(constructorParams: {
         req: IncomingMessage;
         adapter: StorageAdapter<T>;
-        options?: Partial<MultiParterOptions>;
+        options?: Partial<MultiPartifyOptions>;
         transformer?: FileTransformer;
     }): Promise<{ fields: Field[]; files: T[] }> {
         return await new Promise((resolve, reject) => {
             try {
-                const multiParter = new MultiParter(constructorParams);
+                const multiPartify = new MultiPartify(constructorParams);
                 // Make sure to set a then and catch here, since the promise handler is a synchronous function and will not await the parse method.
-                multiParter.parse().then(resolve).catch(reject);
+                multiPartify.parse().then(resolve).catch(reject);
             } catch (err) {
                 // Make sure to try catch here in a promise wrapper, since the constructor can throw a ContentTypeError synchronously.
                 reject(err);
@@ -250,16 +250,16 @@ export class MultiParter<T extends Partial<File>> extends EventEmitter {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const multiParterMiddleware =
+export const multiPartifyMiddleware =
     <
         P = core.ParamsDictionary,
         ResBody = any,
         FType extends Partial<File> = File,
         ReqQuery = qs.ParsedQs,
         Locals extends Record<string, any> = Record<string, any>,
-    >(multiParterOptions: {
+    >(multiPartifyOptions: {
         adapter: StorageAdapter<FType>;
-        options?: Partial<MultiParterOptions>;
+        options?: Partial<MultiPartifyOptions>;
         transformer?: FileTransformer;
     }): RequestHandler<
         P,
@@ -272,7 +272,7 @@ export const multiParterMiddleware =
         Locals
     > =>
     (req, _, next) =>
-        MultiParter.create({ req, ...multiParterOptions })
+        MultiPartify.create({ req, ...multiPartifyOptions })
             .then(({ fields, files }) => {
                 req.body = {
                     fields,

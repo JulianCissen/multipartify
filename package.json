@@ -1,5 +1,5 @@
 {
-    "name": "multiparter",
+    "name": "multipartify",
     "version": "0.1.2",
     "description": "An express-based middleware library for parsing multipart requests.",
     "keywords": [
@@ -13,15 +13,15 @@
         "upload",
         "multer"
     ],
-    "homepage": "https://github.com/JulianCissen/multiparter",
-    "bugs": "https://github.com/JulianCissen/multiparter/issues",
+    "homepage": "https://github.com/JulianCissen/multipartify",
+    "bugs": "https://github.com/JulianCissen/multipartify/issues",
     "license": "MIT",
     "author": "Julian Cissen",
     "files": [
         "dist/**/*"
     ],
     "main": "dist/index.js",
-    "repository": "github:JulianCissen/multiparter",
+    "repository": "github:JulianCissen/multipartify",
     "scripts": {
         "test": "jest",
         "build": "tsc -p tsconfig.build.json",
